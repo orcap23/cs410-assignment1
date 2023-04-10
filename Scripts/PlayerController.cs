@@ -12,9 +12,12 @@ public class PlayerController : MonoBehaviour
 
   private Rigidbody rb;
   private int count;
-
   private float movementX;
   private float movementY;
+  private bool grounded = false;
+  private bool jump = false;
+  private int jumpHeight = 200;
+
 
   // Start is called before the first frame update
     void Start()
@@ -23,7 +26,6 @@ public class PlayerController : MonoBehaviour
 
         // Set the count to zero 
 		count = 0;
-
 		SetCountText();
 
         // Set the text property of the Win Text UI to an empty string, making the 'You Win' (game over message) blank
@@ -52,26 +54,44 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         Vector3 movement = new Vector3(movementX, 0.0f, movementY);
-
         rb.AddForce(movement * speed);
+
+        if(Input.GetKeyDown(KeyCode.Space) && grounded) {
+            jump = true;
+            rb.AddForce(Vector3.up * jumpHeight);
+        }
+
     }
 
-    private void OnTriggerEnter(Collider other)
+    void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.CompareTag("PickUp")) 
+        if (other.gameObject.CompareTag("PickUp"))
         {
             other.gameObject.SetActive(false);
-
-            // Add one to the score variable 'count'
-			count = count + 1;
-
-			// Run the 'SetCountText()' function (see below)
-			SetCountText();
+            count = count + 1;
+            SetCountText();
         }
     }
 
+    void OnCollisionEnter(Collision other)
+    {
+        if (other.gameObject.CompareTag("Ground"))
+        {
+            grounded = true;
+            if (jump)
+            {
+                rb.AddForce(Vector3.up * jumpHeight / 2);
+                jump = false;
+            }
+        }
+    }
 
-  
-
+    void OnCollisionExit(Collision other) 
+    {
+        if (other.gameObject.CompareTag("Ground"))
+        {
+            grounded = false;
+        }
+    } 
 
 }
