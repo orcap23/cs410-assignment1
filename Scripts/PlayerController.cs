@@ -14,9 +14,12 @@ public class PlayerController : MonoBehaviour
   private int count;
   private float movementX;
   private float movementY;
-  private bool grounded = false;
   private bool jump = false;
   private int jumpHeight = 200;
+  private int jumpCount = 0;
+
+  /// add double jump
+  // jump count
 
 
   // Start is called before the first frame update
@@ -51,20 +54,27 @@ public class PlayerController : MonoBehaviour
 		}
 	}
 
+    private void Update(){
+        if(Input.GetKeyDown(KeyCode.Space) && jumpCount < 2) {
+            jump = true;
+            rb.AddForce(Vector3.up * jumpHeight);
+            jumpCount += 1;
+        }
+    }
+
     private void FixedUpdate()
     {
         Vector3 movement = new Vector3(movementX, 0.0f, movementY);
         rb.AddForce(movement * speed);
-
-        if(Input.GetKeyDown(KeyCode.Space) && grounded) {
-            jump = true;
-            rb.AddForce(Vector3.up * jumpHeight);
-        }
+        //print(Input.GetKeyDown(KeyCode.Space));
 
     }
 
-    void OnTriggerEnter(Collider other)
-    {
+    void resetJump(){
+        jumpCount = 0;
+    }
+
+    void OnTriggerEnter(Collider other){
         if (other.gameObject.CompareTag("PickUp"))
         {
             other.gameObject.SetActive(false);
@@ -72,26 +82,5 @@ public class PlayerController : MonoBehaviour
             SetCountText();
         }
     }
-
-    void OnCollisionEnter(Collision other)
-    {
-        if (other.gameObject.CompareTag("Ground"))
-        {
-            grounded = true;
-            if (jump)
-            {
-                rb.AddForce(Vector3.up * jumpHeight / 2);
-                jump = false;
-            }
-        }
-    }
-
-    void OnCollisionExit(Collision other) 
-    {
-        if (other.gameObject.CompareTag("Ground"))
-        {
-            grounded = false;
-        }
-    } 
 
 }
